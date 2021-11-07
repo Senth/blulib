@@ -53,7 +53,7 @@ class ConfigParser(configparser.ConfigParser):
         default = getattr(object, key_info.object_key)
         get_func = getattr(section, key_info.function_name)
         value = get_func(key_info.config_key, fallback=default)
-        if key_info.type == "str":
+        if isinstance(value, str):
             value = ConfigParser._strip_quotes(value)
         setattr(object, key_info.object_key, value)
 

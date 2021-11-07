@@ -1,3 +1,4 @@
+from enum import Enum
 from pathlib import Path
 from typing import Any, List
 
@@ -18,7 +19,7 @@ def parser() -> ConfigParser:
 class Object:
     def __init__(
         self,
-        str_value: str = "",
+        str_value: Any = "",
         str_list: List[str] = [],
         int_value: int = 0,
         int_list: List[int] = [],
@@ -89,7 +90,7 @@ class Object:
             Object(),
             "bool test",
             ["bool:bool_value", "bool_list:bool_list"],
-            Object(bool_value=True, bool_list=[True, False, True, False, True, False, True, False]),
+            Object(bool_value=True, bool_list=[True, False, True, False, True, False, True, False, True, False]),
         ),
         (
             "Should use default value from object when the key is missing",
@@ -132,3 +133,25 @@ def test_to_object(
     else:
         parser.to_object(object, section, *keys)
         assert expected == object
+
+
+class StrEnum(Enum):
+    test = "test"
+
+
+class ContainsEnum:
+    def __init__(self) -> None:
+        self.use_default = StrEnum.test
+        self.replaced = StrEnum.test
+
+
+def test_to_object_read_str_but_is_object(parser: ConfigParser) -> None:
+    expected = {
+        "use_default": StrEnum.test,
+        "replaced": "hello",
+    }
+    actual = ContainsEnum()
+    parser.to_object(actual, "enum as string", "use_default", "replaced")
+
+    assert expected["use_default"] == actual.use_default
+    assert expected["replaced"] == actual.replaced
